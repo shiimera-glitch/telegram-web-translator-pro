@@ -1,0 +1,35 @@
+{
+  "name": "telegram-web-translator-pro",
+  "version": "4.0.0",
+  "description": "RTL/LTR bidi engine for Telegram Web — userscript v4.0.0",
+  "main": "build.js",
+  "scripts": {
+    "build": "node build.js",
+    "watch": "node build.js --watch",
+    "test": "node --test test/*.test.js",
+    "lint": "eslint src/",
+    "release:patch": "node build.js --bump patch",
+    "release:minor": "node build.js --bump minor",
+    "release:major": "node build.js --bump major"
+  },
+  "keywords": [
+    "telegram",
+    "userscript",
+    "tampermonkey",
+    "greasemonkey",
+    "translation",
+    "rtl",
+    "bidi",
+    "arabic",
+    "hebrew"
+  ],
+  "author": "shiimera-glitch",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "chokidar": "^3.6.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
