@@ -11,7 +11,11 @@
 // @license      MIT
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @grant        GM_xmlhttpRequest
 // @grant        GM_registerMenuCommand
+// @connect      translate.googleapis.com
+// @connect      api-free.deepl.com
+// @connect      api.mymemory.translated.net
 // @run-at       document-end
 // @homepageURL  https://github.com/shiimera-glitch/telegram-web-translator-pro
 // @supportURL   https://github.com/shiimera-glitch/telegram-web-translator-pro/issues
@@ -27,4 +31,4 @@
 
 (function () {
   'use strict';
-  // ══ All sections §0–§20 follow in subsequent src/ files ══
+  // === All sections §0-§20 follow in subsequent src/ files ===
