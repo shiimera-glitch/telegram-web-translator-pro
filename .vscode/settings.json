@@ -1,0 +1,22 @@
+{
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.wordWrap": "on",
+  "files.associations": {
+    "*.user.js": "javascript"
+  },
+  "eslint.validate": ["javascript"],
+  "javascript.suggest.autoImports": false,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": false
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true
+  }
+}
