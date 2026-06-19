@@ -30,42 +30,39 @@ jobs:
 
       - name: Verify dist output
         run: |
-          if [ ! -f dist/telegram-web-translator-pro.user.js ]; then
-            echo "ERROR: dist file not found!"
+          DIST=dist/TelegramWebTranslatorPro.user.js
+          if [ ! -f "$DIST" ]; then
+            echo "ERROR: dist file not found: $DIST"
+            ls -la dist/ || true
             exit 1
           fi
-          BYTES=$(wc -c < dist/telegram-web-translator-pro.user.js)
-          echo "Bundle size: $BYTES bytes"
+          BYTES=$(wc -c < "$DIST")
           if [ "$BYTES" -lt 1000 ]; then
-            echo "ERROR: Bundle is suspiciously small ($BYTES bytes)"
+            echo "ERROR: dist file too small ($BYTES bytes)"
             exit 1
           fi
+          echo "Bundle verified: $BYTES bytes"
 
       - name: Extract version from tag
-        id: version
+        id: ver
         run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
 
       - name: Extract changelog entry
         id: changelog
         run: |
-          VERSION=${{ steps.version.outputs.VERSION }}
-          # Extract the section for this version from CHANGELOG.md
-          NOTES=$(awk "/^## \\[$VERSION\\]/,/^## \\[/" CHANGELOG.md | head -n -1 | tail -n +2)
-          if [ -z "$NOTES" ]; then
-            NOTES="See CHANGELOG.md for details."
+          VERSION=${{ steps.ver.outputs.VERSION }}
+          awk "/^## \[?${VERSION}\]?/{found=1; next} found && /^## /{exit} found{print}" CHANGELOG.md \
+            > /tmp/release-notes.md
+          if [ ! -s /tmp/release-notes.md ]; then
+            echo "No changelog entry found for $VERSION — using generic notes."
+            echo "Release $VERSION" > /tmp/release-notes.md
           fi
-          # Write to file to handle multiline
-          echo "$NOTES" > /tmp/release_notes.md
-          echo "NOTES_FILE=/tmp/release_notes.md" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: telegram-web-translator-pro ${{ github.ref_name }}
-          body_path: ${{ steps.changelog.outputs.NOTES_FILE }}
-          files: dist/telegram-web-translator-pro.user.js
-          draft: false
-          prerelease: ${{ contains(github.ref_name, '-') }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: ${{ github.ref_name }}
+          body_path: /tmp/release-notes.md
+          files: dist/TelegramWebTranslatorPro.user.js
+          token: ${{ secrets.GITHUB_TOKEN }}
