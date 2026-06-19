@@ -11,18 +11,30 @@
 //   • Per-bubble context menu item (injected via right-click intercept).
 //
 // No framework — vanilla DOM only.
+// BUG-44 fix: replaced innerHTML template-literal with createElement tree
+//   to eliminate unsanitized external input (opts.tgtLang) in markup.
 
 const PANEL_ID = `${PFX}-panel`;
+
+/** Sanitize a string for safe use as an element attribute value. */
+function _sanitize(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
 
 /**
  * Build and insert the floating control panel.
  * Idempotent — safe to call multiple times.
  *
  * @param {Object} opts
- * @param {string}   opts.tgtLang       - Currently selected target language.
- * @param {boolean}  opts.autoTranslate - Auto-translate enabled?
- * @param {Function} opts.onLangChange  - Called with new lang tag.
- * @param {Function} opts.onAutoToggle  - Called with new boolean.
+ * @param {string}   opts.tgtLang        - Currently selected target language.
+ * @param {boolean}  opts.autoTranslate  - Auto-translate enabled?
+ * @param {Function} opts.onLangChange   - Called with new lang tag.
+ * @param {Function} opts.onAutoToggle   - Called with new boolean.
  * @param {Function} opts.onTranslatePage
  * @param {Function} opts.onCacheClear
  * @param {Function} opts.onSettings
@@ -32,102 +44,140 @@ function buildPanel(opts) {
 
   const panel = document.createElement('div');
   panel.id = PANEL_ID;
-  panel.innerHTML = `
-    <div class="${PFX}-panel-header" title="Drag to move">
-      <span>🌐 Translator Pro ${VER}</span>
-      <button class="${PFX}-close" title="Close">×</button>
-    </div>
-    <div class="${PFX}-panel-body">
-      <label>
-        Target
-        <select id="${PFX}-lang-sel">
-          ${getLangList().map(l =>
-            `<option value="${l.tag}"${l.tag === opts.tgtLang ? ' selected' : ''}>${l.label}</option>`
-          ).join('')}
-        </select>
-      </label>
-      <label class="${PFX}-row">
-        <input type="checkbox" id="${PFX}-auto"${opts.autoTranslate ? ' checked' : ''}>
-        Auto-translate
-      </label>
-      <button id="${PFX}-btn-page">Translate chat</button>
-      <button id="${PFX}-btn-cache">Clear cache</button>
-      <button id="${PFX}-btn-settings">⚙️ Settings</button>
-    </div>
-  `;
+
+  // — Header ——————————————————————————————————————
+  const header = document.createElement('div');
+  header.className = `${PFX}-panel-header`;
+  header.title = 'Drag to move';
+
+  const title = document.createElement('span');
+  title.textContent = `\uD83C\uDF10 Translator Pro ${VER}`;
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = `${PFX}-close`;
+  closeBtn.title = 'Close';
+  closeBtn.textContent = '\u00D7';
+
+  header.appendChild(title);
+  header.appendChild(closeBtn);
+
+  // — Body ———————————————————————————————————————
+  const body = document.createElement('div');
+  body.className = `${PFX}-panel-body`;
+
+  // Lang selector label + select
+  const langLabel = document.createElement('label');
+  langLabel.textContent = 'Target ';
+
+  const langSel = document.createElement('select');
+  langSel.id = `${PFX}-lang-sel`;
+  getLangList().forEach(function (l) {
+    const opt = document.createElement('option');
+    opt.value = l.tag;            // setAttribute via .value — safe
+    opt.textContent = l.label;   // textContent — safe
+    if (l.tag === opts.tgtLang) opt.selected = true;
+    langSel.appendChild(opt);
+  });
+  langLabel.appendChild(langSel);
+
+  // Auto-translate row
+  const autoRow = document.createElement('label');
+  autoRow.className = `${PFX}-row`;
+
+  const autoCheck = document.createElement('input');
+  autoCheck.type = 'checkbox';
+  autoCheck.id = `${PFX}-auto`;
+  autoCheck.checked = !!opts.autoTranslate;
+
+  const autoText = document.createTextNode(' Auto-translate');
+  autoRow.appendChild(autoCheck);
+  autoRow.appendChild(autoText);
+
+  // Action buttons
+  const btnPage = document.createElement('button');
+  btnPage.id = `${PFX}-btn-page`;
+  btnPage.textContent = 'Translate chat';
+
+  const btnCache = document.createElement('button');
+  btnCache.id = `${PFX}-btn-cache`;
+  btnCache.textContent = 'Clear cache';
+
+  const btnSettings = document.createElement('button');
+  btnSettings.id = `${PFX}-btn-settings`;
+  btnSettings.textContent = '\u2699\uFE0F Settings';
+
+  body.appendChild(langLabel);
+  body.appendChild(autoRow);
+  body.appendChild(btnPage);
+  body.appendChild(btnCache);
+  body.appendChild(btnSettings);
+
+  panel.appendChild(header);
+  panel.appendChild(body);
 
   _applyPanelStyles(panel);
   document.body.appendChild(panel);
   _makeDraggable(panel);
 
   // Wire events
-  panel.querySelector(`.${PFX}-close`).onclick = removePanel;
-  panel.querySelector(`#${PFX}-lang-sel`).onchange = e => opts.onLangChange(e.target.value);
-  panel.querySelector(`#${PFX}-auto`).onchange    = e => opts.onAutoToggle(e.target.checked);
-  panel.querySelector(`#${PFX}-btn-page`).onclick   = opts.onTranslatePage;
-  panel.querySelector(`#${PFX}-btn-cache`).onclick  = opts.onCacheClear;
-  panel.querySelector(`#${PFX}-btn-settings`).onclick = opts.onSettings;
-
-  return panel;
+  closeBtn.onclick = removePanel;
+  langSel.onchange = function (e) { opts.onLangChange(e.target.value); };
+  autoCheck.onchange = function (e) { opts.onAutoToggle(e.target.checked); };
+  btnPage.onclick = opts.onTranslatePage;
+  btnCache.onclick = opts.onCacheClear;
+  btnSettings.onclick = opts.onSettings;
 }
 
+/** Remove the panel from DOM if present. */
 function removePanel() {
-  document.getElementById(PANEL_ID)?.remove();
+  const el = document.getElementById(PANEL_ID);
+  if (el) el.remove();
 }
 
-function isPanelOpen() {
-  return !!document.getElementById(PANEL_ID);
-}
-
-/**
- * Update the auto-translate checkbox state without rebuilding panel.
- * @param {boolean} val
- */
-function setPanelAutoState(val) {
-  const cb = document.getElementById(`${PFX}-auto`);
-  if (cb) cb.checked = val;
-}
-
-// ─ Internal helpers ───────────────────────────────────────
-
+/** Apply inline styles to the floating panel. */
 function _applyPanelStyles(panel) {
   Object.assign(panel.style, {
     position:   'fixed',
-    top:        '80px',
+    top:        '60px',
     right:      '16px',
     zIndex:     '2147483647',
-    background: 'var(--color-background, #212121)',
-    color:      'var(--color-text, #e0e0e0)',
-    border:     '1px solid rgba(255,255,255,.15)',
-    borderRadius: '10px',
-    boxShadow:  '0 4px 24px rgba(0,0,0,.5)',
-    minWidth:   '210px',
-    fontFamily: 'inherit',
+    background: '#1e1e2e',
+    color:      '#cdd6f4',
+    border:     '1px solid #45475a',
+    borderRadius: '8px',
+    padding:    '12px',
+    fontFamily: 'system-ui, sans-serif',
     fontSize:   '13px',
+    minWidth:   '200px',
+    boxShadow:  '0 4px 20px rgba(0,0,0,.5)',
     userSelect: 'none',
   });
 }
 
+/** Make an element draggable by its header child. */
 function _makeDraggable(panel) {
-  const handle = panel.querySelector(`.${PFX}-panel-header`);
-  let ox = 0, oy = 0, startX = 0, startY = 0;
-
-  handle.style.cursor = 'move';
-  handle.addEventListener('mousedown', e => {
+  const header = panel.querySelector(`.${PFX}-panel-header`);
+  if (!header) return;
+  let ox = 0, oy = 0, mx = 0, my = 0;
+  header.onmousedown = function (e) {
     e.preventDefault();
-    startX = e.clientX; startY = e.clientY;
-    ox = panel.offsetLeft; oy = panel.offsetTop;
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup',   onUp);
-  });
-
-  function onMove(e) {
-    panel.style.left = `${ox + e.clientX - startX}px`;
-    panel.style.top  = `${oy + e.clientY - startY}px`;
+    ox = e.clientX; oy = e.clientY;
+    document.onmouseup = _stopDrag;
+    document.onmousemove = _drag;
+  };
+  function _drag(e) {
+    mx = ox - e.clientX; my = oy - e.clientY;
+    ox = e.clientX;      oy = e.clientY;
+    panel.style.top  = (panel.offsetTop  - my) + 'px';
+    panel.style.left = (panel.offsetLeft - mx) + 'px';
     panel.style.right = 'auto';
   }
-  function onUp() {
-    document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('mouseup',   onUp);
+  function _stopDrag() {
+    document.onmouseup = null;
+    document.onmousemove = null;
   }
 }
+
+// — Public API ————————————————————————————————————
+window._twtp = window._twtp || {};
+window._twtp.UI = { buildPanel, removePanel };
