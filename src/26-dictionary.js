@@ -19,8 +19,7 @@
 // No framework — vanilla DOM only.
 // BUG-44 compliant: createElement tree, no innerHTML.
 
-/* global PFX, VER */
-
+/* global PFX */
 (function _dictionaryModule() {
   'use strict';
 
@@ -690,7 +689,7 @@
       .replace(/&/g, '&amp;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;')
-      .replace(/</g, '&lt;')
+      .replace(/</g, ===lt;')
       .replace(/>/g, '&gt;');
   }
 
