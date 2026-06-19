@@ -1054,11 +1054,20 @@ function injectStyles() {
 //     so we never block the main thread per-mutation.
 //   • Auto-translate only fires when the user has enabled auto mode.
 //   • Already-translated bubbles (data-tgtp) are skipped.
+//
+// BUG-10 fix: _queue is now a Set<Element> — _enqueue() is O(1) instead of O(n).
+// BUG-11 fix: startObserver() resets _queue and _scheduled before reconnecting.
 
-/** Internal queue of bubble elements waiting to be processed. */
-let _queue      = [];
-let _scheduled  = false;
-let _observer   = null;
+/** Safe prefix constant (BUG-06 guard). */
+const _OBS_PFX = (typeof PFX !== 'undefined') ? PFX : 'twtp';
+
+/**
+ * Internal queue of bubble elements waiting to be processed.
+ * BUG-10 fix: Set<Element> provides O(1) has/add vs O(n) Array.includes.
+ */
+let _queue     = new Set();
+let _scheduled = false;
+let _observer  = null;
 
 /** Callback invoked per bubble that needs processing. Set by init. */
 let _onBubble = null;
@@ -1068,6 +1077,10 @@ let _onBubble = null;
  * @param {(el: Element) => void} fn
  */
 function setObserverHandler(fn) {
+  if (typeof fn !== 'function') {
+    console.warn(`[${_OBS_PFX}] setObserverHandler: expected function, got`, typeof fn);
+    return;
+  }
   _onBubble = fn;
 }
 
@@ -1075,10 +1088,17 @@ function setObserverHandler(fn) {
  * Start observing the given root element (typically the messages
  * container div that Telegram renders into).
  *
+ * BUG-11 fix: clears _queue and resets _scheduled before reconnecting
+ * so stale nodes from a previous chat are never processed.
+ *
  * @param {Element} root
  */
 function startObserver(root) {
   if (_observer) _observer.disconnect();
+
+  // BUG-11 fix: reset state on every (re)start
+  _queue     = new Set();
+  _scheduled = false;
 
   _observer = new MutationObserver(_onMutations);
   _observer.observe(root, {
@@ -1093,11 +1113,11 @@ function stopObserver() {
     _observer.disconnect();
     _observer = null;
   }
-  _queue     = [];
+  _queue     = new Set();
   _scheduled = false;
 }
 
-// ─ Internal ────────────────────────────────────────────────
+// ─ Internal ──────────────────────────────────────────────────────────────
 
 function _onMutations(records) {
   for (const rec of records) {
@@ -1125,16 +1145,15 @@ function _collectBubbles(root) {
 }
 
 function _isBubble(el) {
-  // Quick check: does this element match any of the bubble selectors?
   return el.matches && el.matches(MSGSEL);
 }
 
 function _enqueue(el) {
   // Skip already translated, media-only, or already queued
-  if (isInjected(el)) return;
-  if (!hasMeaningfulText(el)) return;
-  if (_queue.includes(el)) return;
-  _queue.push(el);
+  if (isInjected(el)) return;       // data-tgtp present — already done
+  if (!hasMeaningfulText(el)) return; // no translatable text
+  // BUG-10 fix: Set.has() is O(1) vs Array.includes() O(n)
+  _queue.add(el);
 }
 
 function _scheduleFlush() {
@@ -1146,13 +1165,19 @@ function _scheduleFlush() {
 
 function _flush() {
   _scheduled = false;
-  if (!_onBubble) { _queue = []; return; }
-
-  const batch = _queue.splice(0); // drain
+  if (!_onBubble) {
+    _queue.clear();
+    return;
+  }
+  // BUG-10 fix: drain Set (was: Array.splice(0))
+  const batch = [..._queue];
+  _queue.clear();
   for (const el of batch) {
-    try { _onBubble(el); } catch (e) {
+    try {
+      _onBubble(el);
+    } catch (e) {
       // Never let a bubble error kill the observer loop
-      console.warn(`[${PFX}] observer handler error`, e);
+      console.warn(`[${_OBS_PFX}] observer handler error`, e);
     }
   }
 }
