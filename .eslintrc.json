@@ -8,18 +8,23 @@
     "GM_setValue":              "readonly",
     "GM_getValue":              "readonly",
     "GM_registerMenuCommand":   "readonly",
-    "PFX":                     "readonly",
+    "PFX":                      "readonly",
     "DATA_ATTR":                "readonly",
-    "VER":                     "readonly",
+    "VER":                      "readonly",
     "TWTConfig":                "readonly",
-    "PUA":                     "readonly",
+    "PUA":                      "readonly",
     "puaStash":                 "writable",
     "detectDir":                "readonly",
     "fixNumericDir":            "readonly",
     "bidiIsolate":              "readonly",
+    "stripBidi":                "readonly",
     "getLangDir":               "readonly",
     "getLangLabel":             "readonly",
-    "getLangList":              "readonly"
+    "getLangList":              "readonly",
+    "MSGSEL":                   "readonly",
+    "hasMeaningfulText":        "readonly",
+    "isInjected":               "readonly",
+    "module":                   "writable"
   },
   "parserOptions": {
     "ecmaVersion": 2020,
@@ -32,7 +37,6 @@
     "semi":             ["warn", "always"],
     "prefer-const":     "warn",
     "no-var":           "error",
-    "eqeqeq":          ["warn", "always"],
-    "curly":            "off"
+    "eqeqeq":           ["warn", "always"]
   }
 }
