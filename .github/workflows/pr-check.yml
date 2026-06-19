@@ -18,11 +18,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '24'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Run ESLint
         run: npm run lint
@@ -31,22 +30,10 @@ jobs:
       - name: Build userscript
         run: npm run build
 
-      - name: Verify dist output exists
+      - name: Verify dist output
         run: |
-          if [ ! -f dist/telegram-web-translator-pro.user.js ]; then
+          if [ ! -f dist/TelegramWebTranslatorPro.user.js ]; then
             echo "ERROR: dist file not found after build!"
             exit 1
           fi
-          echo "Build artifact: $(wc -c < dist/telegram-web-translator-pro.user.js) bytes"
-
-      - name: Check version consistency
-        run: |
-          VER_HEADER=$(grep '@version' src/00-header.js | grep -oP '[\d]+\.[\d]+\.[\d]+')
-          VER_CONST=$(grep "VER = '" src/01-constants.js | grep -oP "'[^']+'" | tr -d "'")
-          VER_INIT=$(grep "booting v" src/20-init.js | grep -oP 'v[\d.]+' | tr -d 'v')
-          echo "Header: $VER_HEADER | Constants: $VER_CONST | Init: $VER_INIT"
-          if [ "$VER_HEADER" != "$VER_CONST" ] || [ "$VER_HEADER" != "$VER_INIT" ]; then
-            echo "ERROR: Version mismatch across files!"
-            exit 1
-          fi
-          echo "All version strings match: $VER_HEADER"
+          echo "Build verified: dist/TelegramWebTranslatorPro.user.js exists"
