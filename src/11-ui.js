@@ -109,7 +109,7 @@ function buildPanel(opts) {
       const btnDict = document.createElement('button');
     btnDict.id = `${PFX}-btn-dict`;
     btnDict.textContent = '\uD83D\uDCD6 Dictionary';0F Settings';
-
+    btnDict.textContent = "\uD83D\uDCD6 Dictionary";
   body.appendChild(langLabel);
   body.appendChild(autoRow);
   body.appendChild(btnPage);
