@@ -104,7 +104,11 @@ function buildPanel(opts) {
 
   const btnSettings = document.createElement('button');
   btnSettings.id = `${PFX}-btn-settings`;
-  btnSettings.textContent = '\u2699\uFE0F Settings';
+  btnSettings.textContent = '\u2699\uFE
+    
+      const btnDict = document.createElement('button');
+    btnDict.id = `${PFX}-btn-dict`;
+    btnDict.textContent = '\uD83D\uDCD6 Dictionary';0F Settings';
 
   body.appendChild(langLabel);
   body.appendChild(autoRow);
@@ -114,6 +118,7 @@ function buildPanel(opts) {
 
   panel.appendChild(header);
   panel.appendChild(body);
+    body.appendChild(btnDict);
 
   _applyPanelStyles(panel);
   document.body.appendChild(panel);
@@ -128,7 +133,8 @@ function buildPanel(opts) {
   btnSettings.onclick = opts.onSettings;
 }
 
-/** Remove the panel from DOM if present. */
+/** Remove the panel from DOM if presen
+  btnDict.onclick = function() { window._twtp.Dictionary.showDictionary(); };t. */
 function removePanel() {
   const el = document.getElementById(PANEL_ID);
   if (el) el.remove();
