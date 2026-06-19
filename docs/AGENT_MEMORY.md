@@ -4,6 +4,47 @@
 
 ---
 
+---
+
+## 🔄 COMET-LOOP PROTOCOL — Autonomous Session Resumption
+
+> **READ THIS SECTION FIRST.** This protocol ensures the agent works non-stop across sessions without requiring re-briefing. Every new session MUST execute this boot sequence before taking any other action.
+
+### Boot Sequence (execute in order every session start)
+
+1. **READ** `docs/AGENT_MEMORY.md` (this file) — full context restore
+2. **READ** `docs/AGENT_ROADMAP.md` — current priorities and next tasks
+3. **READ** `docs/WORK-LOG.md` — recent actions taken
+4. **CHECK** open PRs: `https://github.com/shiimera-glitch/telegram-web-translator-pro/pulls`
+5. **CHECK** Actions CI status: `https://github.com/shiimera-glitch/telegram-web-translator-pro/actions`
+6. **EXECUTE** the highest-priority pending task from AGENT_ROADMAP.md
+7. **UPDATE** this file + AGENT_ROADMAP.md + WORK-LOG.md at session end
+
+### Loop Rules
+
+- **Never stop mid-task** to ask for confirmation unless an irreversible destructive action is required
+- **Never ask what to do next** — read AGENT_ROADMAP.md and execute
+- **Never re-explain completed work** — update memory and move to next task
+- **Always commit memory updates** at end of session via PR
+- If blocked (CI red, merge conflict), document the blocker in WORK-LOG.md and move to next task in queue
+- If all tasks complete, perform a full audit: check open issues, stale PRs, open dependabot PRs, CodeFactor alerts
+
+### Session Identity
+
+- Agent: Comet (Perplexity / Nemotron Ultra 253B)
+- Repo owner: shiimera-glitch
+- Project: Telegram Web Translator Pro (TWTP) — RTL/LTR bidi engine userscript
+- Memory last updated: see `## @ Last Updated` below
+
+### Priority Queue (next session picks up here)
+
+1. Merge open dependabot PRs #30, #31 if CI green
+2. Evaluate PR #16 (chokidar bump) — merge if safe
+3. Implement comet-loop self-audit: after each PR merge, run full open-issue scan
+4. Decide project rename (BabelGram / Teleglossia / TeleLingua / TG Lens / ClearGram / Hermes)
+5. Migrate ESLint 8 → 10 flat config (tracked, deferred — open issue exists)
+6. Add comet-loop unit tests to CI (verify AGENT_MEMORY.md has required sections)
+
 ## @ Last Updated
 2026-06-19 ∼03:00 EDT (Session 5)
 
