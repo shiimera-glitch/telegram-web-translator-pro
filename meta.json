@@ -1,0 +1,39 @@
+{
+  "_comment": "SINGLE SOURCE OF TRUTH — edit this file to rename the project, bump version, or change description. Run 'node build.js' afterwards.",
+
+  "name": "Telegram Web Translator Pro",
+  "slug": "TelegramWebTranslatorPro",
+  "version": "4.1.0",
+  "description": "RTL/LTR bidi engine, context injection, mixed-script segmentation, spoiler support, PUA-guard rich format preservation, dual targets, LRU cache, circuit breaker",
+  "descriptionShort": "RTL/LTR bidi engine for Telegram Web — userscript",
+
+  "namespace": "https://greasyfork.org/",
+  "author": "shiimera-glitch",
+  "license": "MIT",
+  "homepageURL": "https://github.com/shiimera-glitch/telegram-web-translator-pro",
+  "supportURL": "https://github.com/shiimera-glitch/telegram-web-translator-pro/issues",
+
+  "match": [
+    "https://web.telegram.org/a/*",
+    "https://web.telegram.org/k/*"
+  ],
+  "grant": [
+    "GM_setValue",
+    "GM_getValue",
+    "GM_xmlhttpRequest",
+    "GM_registerMenuCommand"
+  ],
+  "connect": [
+    "translate.googleapis.com",
+    "api-free.deepl.com",
+    "api.mymemory.translated.net",
+    "api.deepl.com",
+    "libretranslate.com",
+    "translate.yandex.net",
+    "api.openai.com",
+    "api.anthropic.com",
+    "api.cognitive.microsofttranslator.com",
+    "*"
+  ],
+  "runAt": "document-end"
+}
