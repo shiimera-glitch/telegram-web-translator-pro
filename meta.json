@@ -32,8 +32,7 @@
     "translate.yandex.net",
     "api.openai.com",
     "api.anthropic.com",
-    "api.cognitive.microsofttranslator.com",
-    "*"
+    "api.cognitive.microsofttranslator.com"
   ],
   "runAt": "document-end"
 }
