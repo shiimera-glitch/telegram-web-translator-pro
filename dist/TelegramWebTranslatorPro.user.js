@@ -16,6 +16,13 @@
 // @connect      translate.googleapis.com
 // @connect      api-free.deepl.com
 // @connect      api.mymemory.translated.net
+// @connect      api.deepl.com
+// @connect      libretranslate.com
+// @connect      translate.yandex.net
+// @connect      api.openai.com
+// @connect      api.anthropic.com
+// @connect      api.cognitive.microsofttranslator.com
+// @connect      *
 // @run-at       document-end
 // @homepageURL  https://github.com/shiimera-glitch/telegram-web-translator-pro
 // @supportURL   https://github.com/shiimera-glitch/telegram-web-translator-pro/issues
