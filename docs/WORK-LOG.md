@@ -66,3 +66,26 @@ Session journal, efficiency registry, inter-model delegation record, and known b
 | Models delegated | Vibe (Mistral), GLM-5.2 |
 | Bugs pre-identified | 3 (BUG-01, BUG-02, BUG-03) |
 | Next action | Collect model outputs → patch bugs → commit fixes to `src/` |
+
+
+---
+
+## Session Summary — 2026-06-19
+
+| Item | Detail |
+| :--- | :--- |
+| Bugs patched | BUG-01 (`b4e1f53`), BUG-02 (`b199fb5`), BUG-03 (`b4e1f53`) |
+| Files changed | `src/22-engines.js` (277 lines, full engine suite), `src/10-cache.js` (CACHE_MAX_L2 dynamic) |
+| Issues closed | #1 (BUG-01), #2 (BUG-02), #3 (BUG-03) — all closed as completed |
+| Engine coverage | 4/10 → 10/10 (google, deepl, libretranslate, azure, deepl_pro, mymemory, lingva, openai, anthropic, yandex) |
+| Next action | Run integration test in Telegram Web A-app; audit `07-translator.js` for engine dispatch correctness |
+
+---
+
+## Bug Tracker (updated 2026-06-19)
+
+| ID | File | Severity | Description | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| BUG-01 | 22-engines.js | **HIGH** | `name: 'microsoft'` vs `id: 'azure'` mismatch | **Closed** `b4e1f53` |
+| BUG-02 | 10-cache.js | **MED** | `CACHE_MAX_L2=2000` vs `TIMING.cacheMaxEntries=800` | **Closed** `b199fb5` |
+| BUG-03 | 22-engines.js | **HIGH** | 6 of 10 declared engines missing `register()` | **Closed** `b4e1f53` |
