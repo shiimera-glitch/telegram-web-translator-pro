@@ -5,7 +5,7 @@
 ---
 
 ## @ Last Updated
-2026-06-19 ∼03:00 EDT (Session 5 revision)
+2026-06-19 ~04:30 EDT (Session 6)
 
 ---
 
@@ -13,12 +13,15 @@
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| P0-1 | Merge PR #32 (`fix/ui-innerhtml-bug44`) | ⏳ CI pending | Critical security fix — BUG-44 |
-| P0-2 | Merge PR #33 (`fix/registry-exports`) | ⏳ CI pending | 3 modules missing `window._twtp` |
-| P0-3 | Merge PR #34 (`docs/session5-memory-update`) | ⏳ CI pending | AGENT_MEMORY + ROADMAP sync |
-| P0-4 | Merge PR #16 (chokidar 3→5) | ⏳ Awaiting Dependabot rebase | `fs.watch` confirmed; safe |
+| P0-1 | Merge PR #32 (`fix/ui-innerhtml-bug44`) | ✅ DONE | Merged Session 6 — BUG-44 innerHTML fix |
+| P0-2 | Merge PR #33 (`fix/registry-exports`) | ✅ DONE | Merged Session 6 — 3 modules registered |
+| P0-3 | Merge PR #34 (`docs/session5-memory-update`) | ✅ DONE | Merged Session 6 — AGENT_MEMORY + ROADMAP sync |
+| P0-4 | Merge PR #16 (chokidar 3→5) | 🔄 CI pending | Rebase triggered via @dependabot rebase; `fs.watch` confirmed; safe |
 | P0-5 | **Project rename decision** | ⏳ Awaiting user | Candidates: BabelGram ★, Teleglossia, TeleLingua |
-
+| P0-6 | PR #35 — comet-loop protocol | ✅ DONE | Merged Session 6 — autonomous resumption boot sequence |
+| P0-7 | PR #30 — softprops/action-gh-release 2→3 | ✅ DONE | Merged Session 6 |
+| P0-8 | PR #31 — github/codeql-action 3→4 | ✅ DONE | Merged Session 6 |
+| P0-9 | v4.1.0 release retag at HEAD | ✅ DONE | Deleted stale tag, recreated at main HEAD; TelegramWebTranslatorPro.user.js attached |
 ---
 
 ## 🟠 Priority 1 — High (v4.1.x / Near-term)
