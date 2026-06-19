@@ -109,3 +109,8 @@ function getLangList() {
       return a.label.localeCompare(b.label);
     });
 }
+
+
+// — Public API ———————————————————————————————————
+window._twtp = window._twtp || {};
+window._twtp.LangMap = { getLangDir, getLangLabel, getLangList };

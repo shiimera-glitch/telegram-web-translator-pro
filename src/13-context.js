@@ -100,3 +100,8 @@ function getChatTitle() {
   const el = document.querySelector('.peer-title, .chat-info .title');
   return el ? el.textContent.trim() : '';
 }
+
+
+// — Public API ———————————————————————————————————
+window._twtp = window._twtp || {};
+window._twtp.Context = { getSenderName, getChatTitle, buildHint: _buildHint };

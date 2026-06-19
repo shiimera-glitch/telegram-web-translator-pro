@@ -113,3 +113,8 @@ function applyDir(el, dir = 'auto') {
   const resolved = dir === 'auto' ? detectDir(el.textContent || '') : dir;
   if (el.dir !== resolved) el.dir = resolved;
 }
+
+
+// — Public API ———————————————————————————————————
+window._twtp = window._twtp || {};
+window._twtp.Bidi = { detectDir, bidiIsolate, stripBidi, fixNumericDir, applyDir };
