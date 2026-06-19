@@ -75,6 +75,10 @@ npm run release:major   # 4.0.0 → 5.0.0
 | `19-compat.js` | Compat | GM API shims, feature detection |
 | `20-init.js` | Init | Bootstrap wiring & public API surface |
 | `21-footer.js` | Footer | IIFE close, console banner, self-test |
+| `22-engines.js` | Engines | Multi-engine registry: Google, DeepL, LibreTranslate, Microsoft |
+| `23-adapter.js` | Adapter | Unified A/K DOM selector map & bubble translation API |
+| `24-a11y.js` | A11y | ARIA labels, keyboard nav, focus trap, screen-reader hints |
+| `25-dragdrop.js` | DragDrop | Drag-and-drop text/image onto panel with auto-translate |
 
 ## Keyboard shortcuts
 
@@ -96,3 +100,30 @@ The build script (`build.js`) concatenates `src/00` through `src/21` in order in
 ## License
 
 MIT — see [LICENSE](LICENSE)
+
+---
+
+## v4.1.0 Roadmap
+
+### Completed in this release
+- [x] 22-engines.js: Multi-engine registry (Google, DeepL, LibreTranslate, Microsoft Azure)
+- [x] 23-adapter.js: Unified Telegram Web A/K DOM adapter with bubble toggle API
+- [x] 24-a11y.js: ARIA labelling, keyboard focus trap, screen-reader bubble hints
+- [x] 25-dragdrop.js: Drag-and-drop text/image onto panel; auto-translate + clipboard
+- [x] build.js: updated FILES array to include all 26 modules (00-25)
+- [x] README.md: full module table + roadmap
+
+### Planned (v4.2 / v5)
+- [ ] 26-ocr.js: Image OCR pipeline (Tesseract.js) for photo captions and stickers
+- [ ] 27-tts.js: Text-to-speech for translated messages (Web Speech API)
+- [ ] 28-addons.js: Plugin loader API for third-party extensions
+- [ ] IME input support for CJK languages
+- [ ] Translation memory / glossary (user-defined term overrides)
+- [ ] Privacy mode: local-only via WebAssembly NLLB model
+- [ ] Web extension build target (Manifest V3, content-script variant)
+- [ ] Monetization: premium engines unlocked via license key
+
+### Known limitations
+- build.js comment shows `00 > 2125` (cosmetic only, no functional impact)
+- DeepL and Microsoft engines require API key in settings
+- Image drag-and-drop is stubbed for v5 OCR pipeline
