@@ -141,3 +141,28 @@
 - `innerHTML` with any external input is forbidden even if input appears controlled.
 - `npm ci` fails without a lockfile — use `npm install`.
 - Node 20 is deprecated; use Node 24 in all CI workflows.
+
+---
+
+## 💾 Session 6 — Completed Items
+
+**Date:** 2026-06-19 (continuation of Session 5)
+
+**Completed items (Session 6):**
+- Reviewed PR #37 CodeRabbit feedback — 2 actionable items identified
+- Fixed `meta.json`: removed wildcard `"*"` from `connect` allowlist (security hardening) — commit `86fe7bd`
+- Fixed `build.js`: replaced `require('./package.json')` with `require('./meta.json')` as single source of truth; derived `OUT_FILE` from `META.slug` — commit `e05f272`
+- Merged PR #37 `feat(meta): add meta.json — single source of truth` into `main` (3 commits, 3 checks passed)
+- Deleted `feat/meta-single-source` branch post-merge
+
+**Current main branch state:**
+- `meta.json` is the canonical single source of truth for name, slug, version, description, namespace, match, grant, connect, runAt
+- `build.js` reads `META = require('./meta.json')`, derives `OUT_FILE` from `META.slug`, bumps both `meta.json` and `package.json` when `--bump` is passed
+- No wildcard in `connect` — all 9 translation API domains explicitly listed
+- All v4.1.0 CI checks green (PR Quality Check + CodeQL + coderabbitai)
+
+**Next session priorities:**
+1. Tag `v4.1.0` release — create GitHub release pointing to `main` HEAD with `dist/TelegramWebTranslatorPro.user.js` artifact
+2. Update `AGENT_ROADMAP.md` — mark meta single-source milestone as done
+3. Address ESLint warnings (10 `no-unused-vars` in pua/segmenter/bidi) — track as separate issue/PR
+4. Project rename decision — awaiting user direction (BabelGram / Teleglossia / TeleLingua candidates)
