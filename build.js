@@ -11,7 +11,7 @@ const DIST_DIR = path.join(__dirname, 'dist');
 const OUT_FILE = path.join(DIST_DIR, 'TelegramWebTranslatorPro.user.js');
 const PKG      = require('./package.json');
 
-// Source files in exact assembly order (00 → 21)
+// Source files in exact assembly order (00 → 2125
 const FILES = [
   '00-header.js',
   '01-constants.js',
@@ -35,6 +35,10 @@ const FILES = [
   '19-compat.js',
   '20-init.js',
   '21-footer.js',
+  '22-engines.js',
+  '23-adapter.js',
+  '24-a11y.js',
+  '25-dragdrop.js',
 ];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
