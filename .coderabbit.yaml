@@ -1,0 +1,82 @@
+# CodeRabbit configuration for telegram-web-translator-pro
+# https://docs.coderabbit.ai/guides/configure-coderabbit
+
+language: en
+
+reviews:
+  # Auto-review all PRs targeting main
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - main
+
+  # Profile: assertive gives more detailed, critical feedback
+  profile: assertive
+
+  # Focus areas most relevant to a JS userscript/browser-extension project
+  review_status: true
+  collapse_walkthrough: false
+
+  path_instructions:
+    - path: "src/**/*.js"
+      instructions: |
+        This is a Tampermonkey/Violentmonkey userscript that runs inside Telegram Web (web.telegram.org).
+        All source files are concatenated by the build system (build.js) into a single dist file.
+        There is NO module system — all functions and constants are in shared global scope.
+        Key architectural rules:
+        - `window._twtp` is the module registry; each file must export itself via `window._twtp.ModuleName = { ... }`
+        - `DATA_ATTR` (defined in 01-constants.js) is the canonical injected attribute; never hardcode 'data-tgtp'
+        - `VER` (from 01-constants.js) must match `@version` in 00-header.js and the boot log in 20-init.js
+        - `PFX` is the CSS/DOM prefix; always use it instead of raw strings
+        - The observer (09-observer.js) uses `isInjected(el)` to skip already-translated bubbles
+        - All DOM mutations go through `injectTranslation()` / `removeInjection()` from 08-injector.js
+        - RTL language support is critical: always check bidi direction before injecting text
+        - Never use `innerHTML` — use `textContent` or DOM API only (XSS risk in chat context)
+        Review for: missing `window._twtp` exports, hardcoded attribute strings, version mismatches,
+        innerHTML usage, missing null-checks on DOM queries, and bidi/RTL correctness.
+
+    - path: "src/00-header.js"
+      instructions: |
+        This is the Tampermonkey metadata block. @version here MUST match VER in 01-constants.js
+        and the boot log string in 20-init.js. Flag any mismatch immediately.
+
+    - path: "src/01-constants.js"
+      instructions: |
+        Central constants file. VER, PFX, DATA_ATTR, MSGSEL are used everywhere.
+        Changes here have cascading effects — review carefully for ripple impact.
+
+    - path: "src/20-init.js"
+      instructions: |
+        Boot/init module. The version string in console.log('[twtp] booting vX.Y.Z')
+        must match @version in 00-header.js and VER in 01-constants.js.
+        Observer.start() must be called with a valid DOM root element — never undefined.
+        HotkeyManager.registerDefaults() must only be called ONCE (it's called inside init()).
+
+    - path: "src/22-engines.js"
+      instructions: |
+        Translation engine adapters. Each engine must handle fetch errors gracefully,
+        respect rate limits, and return null (not throw) on failure so the adapter
+        can fall back to the next engine.
+
+    - path: "src/23-adapter.js"
+      instructions: |
+        Engine orchestration layer. Must implement fallback chain across engines.
+        Never let a single engine failure bubble up to the observer.
+
+    - path: "dist/**"
+      instructions: |
+        Auto-generated build artifact. Do not review line-by-line — only check
+        that the file exists and the @version header matches src/00-header.js.
+
+    - path: ".github/workflows/**"
+      instructions: |
+        GitHub Actions CI. Ensure: Node 20+, npm ci (not npm install),
+        ESLint runs before build, version consistency check is present.
+
+  # Issue linking — validate PRs reference the bug they fix
+  request_changes_workflow: true
+
+chat:
+  # Allow @coderabbitai commands in PR comments
+  auto_reply: true
