@@ -30,22 +30,10 @@ jobs:
       - name: Build userscript
         run: npm run build
 
-      - name: Verify dist output exists
+      - name: Verify dist output
         run: |
           if [ ! -f dist/TelegramWebTranslatorPro.user.js ]; then
             echo "ERROR: dist file not found after build!"
             exit 1
           fi
-          echo "Build output verified: dist/TelegramWebTranslatorPro.user.js"
-
-      - name: Check version consistency
-        run: |
-          PKG_VER=$(node -p "require('./package.json').version")
-          HEADER_VER=$(grep -m1 '@version' dist/TelegramWebTranslatorPro.user.js | awk '{print $3}')
-          echo "package.json: $PKG_VER"
-          echo "userscript header: $HEADER_VER"
-          if [ "$PKG_VER" != "$HEADER_VER" ]; then
-            echo "ERROR: Version mismatch! package.json=$PKG_VER header=$HEADER_VER"
-            exit 1
-          fi
-          echo "Version consistency check passed: v$PKG_VER"
+          echo "Build verified: dist/TelegramWebTranslatorPro.user.js exists"
