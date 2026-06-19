@@ -1,17 +1,15 @@
 #!/usr/bin/env node
-// build.js – Concatenation build script for TelegramWebTranslatorPro v4.0.0
+// build.js – Concatenation build script for TelegramWebTranslatorPro v4.1.0
 // Usage: node build.js [--watch] [--bump patch|minor|major]
-
-const fs          = require('fs');
-const path        = require('path');
-const { execSync } = require('child_process');
+const fs   = require('fs');
+const path = require('path');
 
 const SRC_DIR  = path.join(__dirname, 'src');
 const DIST_DIR = path.join(__dirname, 'dist');
 const OUT_FILE = path.join(DIST_DIR, 'TelegramWebTranslatorPro.user.js');
 const PKG      = require('./package.json');
 
-// Source files in exact assembly order (00 → 2125
+// Source files in exact assembly order (00 → 25)
 const FILES = [
   '00-header.js',
   '01-constants.js',
@@ -41,12 +39,21 @@ const FILES = [
   '25-dragdrop.js',
 ];
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ──────────────────────────────────────────────────────────────────────────────
 function stamp() {
   return new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
 }
 
+/**
+ * Compute the next semver string from PKG.version.
+ * @param {'patch'|'minor'|'major'} type
+ * @returns {string}
+ */
 function bumpVersion(type) {
+  const VALID_TYPES = ['patch', 'minor', 'major'];
+  if (!VALID_TYPES.includes(type)) {
+    throw new Error(`[build] invalid bump type: "${type}". Expected: ${VALID_TYPES.join('|')}`);
+  }
   const parts = PKG.version.split('.').map(Number);
   if (type === 'major') { parts[0]++; parts[1] = 0; parts[2] = 0; }
   else if (type === 'minor') { parts[1]++; parts[2] = 0; }
@@ -54,18 +61,19 @@ function bumpVersion(type) {
   return parts.join('.');
 }
 
-// ── Build ──────────────────────────────────────────────────────────────────────
+// ── Build ────────────────────────────────────────────────────────────────────────────────
 function build(bumpType) {
   if (!fs.existsSync(DIST_DIR)) fs.mkdirSync(DIST_DIR, { recursive: true });
 
-  // Optionally bump version in package.json
+  // Resolve version — optionally bump and persist to package.json
   let version = PKG.version;
   if (bumpType) {
     version = bumpVersion(bumpType);
-    PKG.version = version;
+    // Write a copy to avoid mutating the cached require() object
+    const pkgCopy = Object.assign({}, PKG, { version });
     fs.writeFileSync(
       path.join(__dirname, 'package.json'),
-      JSON.stringify(PKG, null, 2) + '\n',
+      JSON.stringify(pkgCopy, null, 2) + '\n',
     );
     console.log(`[build] version bumped to ${version}`);
   }
@@ -80,19 +88,22 @@ function build(bumpType) {
     return fs.readFileSync(p, 'utf8');
   });
 
-  // Replace version placeholder in header
+  // Cache timestamp to keep header + log line identical
+  const buildStamp = stamp();
+
+  // Replace version/date placeholders in header chunk
   const output = chunks
     .join('\n')
-    .replace(/@version\s+\S+/, `@version      ${version}`)
-    .replace(/@builddate\s+\S+/, `@builddate    ${stamp()}`);
+    .replace(/@version\s+\S+/, `@version ${version}`)
+    .replace(/@builddate\s+\S+/, `@builddate ${buildStamp}`);
 
   fs.writeFileSync(OUT_FILE, output, 'utf8');
 
   const kb = (fs.statSync(OUT_FILE).size / 1024).toFixed(1);
-  console.log(`[build] ✅  ${OUT_FILE}  (${kb} KB)  v${version}  @ ${stamp()}`);
+  console.log(`[build] ✅ ${OUT_FILE} (${kb} KB) v${version} @ ${buildStamp}`);
 }
 
-// ── Watch mode ─────────────────────────────────────────────────────────────────
+// ── Watch mode ────────────────────────────────────────────────────────────────────────────────
 function watch() {
   console.log('[build] watching src/ for changes…');
   build();
@@ -104,7 +115,7 @@ function watch() {
   });
 }
 
-// ── CLI entry ───────────────────────────────────────────────────────────────────
+// ── CLI entry ───────────────────────────────────────────────────────────────────────────────────
 const args     = process.argv.slice(2);
 const doWatch  = args.includes('--watch');
 const bumpIdx  = args.indexOf('--bump');
