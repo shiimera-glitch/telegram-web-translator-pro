@@ -104,7 +104,7 @@ function buildPanel(opts) {
 
   const btnSettings = document.createElement('button');
   btnSettings.id = `${PFX}-btn-settings`;
-  btnSettings.textContent = '\u2699\uFE
+  btnSettings.textContent = '\u2699\uFE0F';
     
       const btnDict = document.createElement('button');
     btnDict.id = `${PFX}-btn-dict`;
