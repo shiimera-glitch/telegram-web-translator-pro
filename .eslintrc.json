@@ -27,7 +27,7 @@
     "module":                   "writable"
   },
   "parserOptions": {
-    "ecmaVersion": 2020,
+    "ecmaVersion": "latest",
     "sourceType":  "script"
   },
   "rules": {
