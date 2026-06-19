@@ -32,7 +32,7 @@ jobs:
 
       - name: Get version
         id: ver
-        run: echo "VERSION=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
+        run: echo "VERSION=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
 
       - name: Commit dist artifact
         run: |
