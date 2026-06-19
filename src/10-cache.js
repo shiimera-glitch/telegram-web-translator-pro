@@ -12,7 +12,7 @@
 
 const CACHE_TTL_MS  = 7 * 24 * 60 * 60 * 1000; // 7 days
 const CACHE_KEY_GM  = `${PFX}_cache`;            // GM storage key
-const CACHE_MAX_L2  = 2000;                       // max L2 entries (evict LRU)
+const CACHE_MAX_L2 = (window._twtp && window._twtp.Config && window._twtp.Config.cacheMaxEntries) || 800; // BUG-02 fix: was 2000, now reads from TWTConfig (fallback 800)
 
 /** In-memory L1 cache: fingerprint → CacheEntry. */
 const _L1 = new Map();
