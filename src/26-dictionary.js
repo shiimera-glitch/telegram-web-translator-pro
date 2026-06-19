@@ -685,11 +685,11 @@
    * Sanitize string for safe DOM insertion (used in error messages).
    */
   function _sanitize(str) {
-    return String(str == null ? '' : str)
+    return String(str === null ? '' : str)
       .replace(/&/g, '&amp;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;')
-      .replace(/</g, ===lt;')
+      .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
   }
 
