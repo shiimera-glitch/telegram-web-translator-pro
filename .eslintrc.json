@@ -5,22 +5,38 @@
     "greasemonkey": true
   },
   "globals": {
-    "GM_setValue":          "readonly",
-    "GM_getValue":          "readonly",
-    "GM_registerMenuCommand": "readonly"
+    "GM_setValue":              "readonly",
+    "GM_getValue":              "readonly",
+    "GM_registerMenuCommand":   "readonly",
+    "PFX":                      "readonly",
+    "DATA_ATTR":                "readonly",
+    "VER":                      "readonly",
+    "TWTConfig":                "readonly",
+    "PUA":                      "readonly",
+    "puaStash":                 "writable",
+    "detectDir":                "readonly",
+    "fixNumericDir":            "readonly",
+    "bidiIsolate":              "readonly",
+    "stripBidi":                "readonly",
+    "getLangDir":               "readonly",
+    "getLangLabel":             "readonly",
+    "getLangList":              "readonly",
+    "MSGSEL":                   "readonly",
+    "hasMeaningfulText":        "readonly",
+    "isInjected":               "readonly",
+    "module":                   "writable"
   },
   "parserOptions": {
-    "ecmaVersion": 2020,
+    "ecmaVersion": "latest",
     "sourceType":  "script"
   },
   "rules": {
-    "no-unused-vars":    ["warn", { "argsIgnorePattern": "^_" }],
-    "no-console":        "off",
-    "no-undef":          "error",
-    "semi":              ["warn", "always"],
-    "prefer-const":      "warn",
-    "no-var":            "error",
-    "eqeqeq":            ["warn", "always"],
-    "curly":             "off"
+    "no-unused-vars":   ["warn", { "argsIgnorePattern": "^_" }],
+    "no-console":       "off",
+    "no-undef":         "error",
+    "semi":             ["warn", "always"],
+    "prefer-const":     "warn",
+    "no-var":           "error",
+    "eqeqeq":           ["warn", "always"]
   }
 }
