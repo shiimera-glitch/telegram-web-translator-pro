@@ -920,21 +920,26 @@ async function translate(text, srcLang, tgtLang, cfg = {}) {
 //
 // Rules:
 //   • CSS-first: set `dir` attribute on wrapper; never insert bidi marks
-//     into the text content itself (unless bidiIsolate is explicitly called).
-//   • Never replace the bubble’s existing DOM structure — only update
-//     text nodes and add a translation wrapper `<span>`.
-//   • All injected elements carry data-tgtp=VER so the observer
-//     can skip already-translated bubbles.
+//       into the text content itself (unless bidiIsolate is explicitly called).
+//   • Never replace the bubble's existing DOM structure — only update
+//       text nodes and add a translation wrapper `<span>`.
+//   • All injected elements carry data-tgtp4=VER so the observer
+//       can skip already-translated bubbles.
 //   • Idempotent: calling inject twice on the same el is safe.
+//
+// BUG-29 fix: INJECTED_ATTR now reads DATA_ATTR from 01-constants.js (data-tgtp4).
+//   Was hardcoded as 'data-tgtp' which diverged from DATA_ATTR = 'data-tgtp4'.
+// BUG-37 fix: Added window._twtp.Injector export block at end of file.
 
 // CSS class / data attribute used to mark translated content.
 const INJECTED_CLASS = `${PFX}-translated`;
-const INJECTED_ATTR  = 'data-tgtp';
+// BUG-29 fix: use DATA_ATTR from 01-constants.js; fallback for standalone use.
+const INJECTED_ATTR  = (typeof DATA_ATTR !== 'undefined') ? DATA_ATTR : 'data-tgtp4';
 
 /**
  * Inject a translated string into a bubble element.
  *
- * Creates a `<div class="tgtp3-translated">` wrapper appended after
+ * Creates a `<div class="tgtp4-translated">` wrapper appended after
  * the existing content, with the correct `dir` attribute.
  * The original content is left untouched so toggling is trivial.
  *
@@ -984,21 +989,18 @@ function removeInjection(el) {
 
 /**
  * Toggle the visibility of an existing injection.
- * Used by the “show/hide translation” UI action.
+ * Used by the "show/hide translation" UI action.
  *
  * @param {Element} el
- * @returns {boolean}  true = now visible, false = now hidden.
+ * @returns {boolean} true = now visible, false = now hidden.
  */
 function toggleInjection(el) {
   const wrap = el.querySelector(`.${INJECTED_CLASS}`);
   if (!wrap) return false;
-
   const hidden = wrap.style.display === 'none';
   wrap.style.display = hidden ? '' : 'none';
-
   const sep = el.querySelector(`.${INJECTED_CLASS}-sep`);
   if (sep) sep.style.display = wrap.style.display;
-
   return hidden; // true = we just made it visible
 }
 
@@ -1018,7 +1020,6 @@ function isInjected(el) {
  */
 function injectStyles() {
   if (document.getElementById(`${PFX}-style`)) return; // already injected
-
   const style = document.createElement('style');
   style.id = `${PFX}-style`;
   style.textContent = `
@@ -1044,6 +1045,20 @@ function injectStyles() {
   `;
   document.head.appendChild(style);
 }
+
+// ── Public API ───────────────────────────────────────────────────────────────
+// BUG-37 fix: export all injector functions to window._twtp.Injector so
+// 20-init.js, 15-renderer.js, and 23-adapter.js can access them via _get('Injector').
+window._twtp = window._twtp || {};
+window._twtp.Injector = {
+  inject:       injectTranslation,
+  remove:       removeInjection,
+  toggle:       toggleInjection,
+  isInjected,
+  injectStyles,
+  INJECTED_ATTR,
+  INJECTED_CLASS,
+};
 
 // §9 — MUTATION OBSERVER
 // Phase 3 · watches the DOM for new/changed message bubbles.
