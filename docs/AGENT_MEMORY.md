@@ -4,21 +4,32 @@
 
 ---
 
-## 🗓 Last Updated
-2026-06-20 ~03:00 EDT (Session 4)
+## @ Last Updated
+2026-06-19 ∼03:00 EDT (Session 5)
 
 ---
 
-## 🧠 Repository Context
+## 🟠 Repository Context
 - **Repo:** `shiimera-glitch/telegram-web-translator-pro`
 - **Purpose:** RTL/LTR bidi engine userscript for Telegram Web (v4.1.0)
 - **Language:** 100% JavaScript (Tampermonkey/Violentmonkey/ScriptCat)
 - **Main branch:** `main` (protected, requires CI + CodeQL)
-- **Active branches:** none (all feature branches merged and deleted)
+- **Active branches:** `fix/ui-innerhtml-bug44`, `fix/registry-exports` (PRs open, CI pending)
 
 ---
 
 ## ✅ Completed This Session
+### Session 5 (2026-06-19)
+- Merged PR #29: `fix(deps): remove invalid labels from dependabot.yml` — removed non-existent `dependencies`, `automated`, `github-actions` labels
+- Merged PR #28: `chore(version): bump package.json to 4.1.0, sync description`
+- Opened PR #32: `fix(ui): replace innerHTML with createElement tree — BUG-44` — eliminates unsanitized `opts.tgtLang` injection in `11-ui.js`; adds `window._twtp.UI` export
+- Opened PR #33: `fix(registry): add missing window._twtp exports to 02-langmap, 03-bidi, 13-context` — 3 modules were not registered in the `window._twtp` namespace
+- **BUG-44 identified and fixed:** `11-ui.js` used `panel.innerHTML = \`...\`` with `opts.tgtLang` as unsanitized external input — replaced with full `createElement`/`textContent` tree
+- **Registry gap found:** `02-langmap.js`, `03-bidi.js`, `13-context.js` had no `window._twtp` export blocks
+- Confirmed `release.yml` historical failure (run triggered by PR #15 merge before dist filename fix in PR #27) was pre-fix and expected — not a current issue
+- Confirmed `build.js` uses native `fs.watch` exclusively (not chokidar); chokidar PR #16 is safe to merge
+- Confirmed `09-observer.js` has `_MAX_ERRORS = 3`, `WeakMap` blacklist, and `_processing` flag — compliant
+
 ### Session 4 (2026-06-20)
 - Merged PR #23: `refactor/build-codefactor` → remove dead `execSync` import, cache `stamp()`, guard `bumpVersion()`, write PKG copy (4 checks passed)
 - Merged PR #24: `fix/observer-codefactor` → `typeof MSGSEL` null guard, WeakMap error-count blacklist after `_MAX_ERRORS` (3 required checks passed)
@@ -32,45 +43,60 @@
 - Merged PR #22: `docs/agent-memory` → AGENT_MEMORY.md created
 - Identified Dependabot PRs: #14 (setup-node 4→6), #15 (checkout 4→7), #16 (chokidar 3→5), #17 (eslint 8→10 — DANGEROUS, skip)
 
-### Session 2 (2026-06-19)
-- Created CI/CD pipeline: `pr-check.yml`, `codeql.yml`, `release.yml`
-- Created `.eslintrc.json` with full globals
-- Created `.coderabbit.yaml`
-- Fixed Node 24 / npm install inconsistency across branches
-- Merged PR #18: `ci/fix-pr-check-node24`
+### Session 2 (2026-06-20)
+- Created CI/CD pipeline, configured `.eslintrc.json` and `.coderabbit.yaml`, fixed environment inconsistencies, merged PR #18
 
-### Session 1 (2026-06-19)
-- Initial repository hardening
-- Branch protection setup
-- Dependabot configuration
-- CodeFactor integration
+### Session 1 (2026-06-20)
+- Initial repo hardening, branch protection, Dependabot configuration, and CodeFactor integration
 
 ---
 
-## 🔴 Open / Pending Tasks (Priority Order)
-1. **IN PROGRESS:** Merge Dependabot PRs #14 (setup-node 4→6), #15 (checkout 4→7) — CI queued
-2. **SKIP:** PR #17 (eslint 8→10) — BREAKING CHANGE, requires flat config migration
-3. **CAUTION:** PR #16 (chokidar 3→5) — test build first before merging
-4. **TAG:** Push `git tag v4.1.0` to trigger `release.yml` once all PRs merged
-5. **PLAN:** Initialize `comet-loop` architecture — autonomous agent persistence design
+## 🔴 Open / Pending Tasks
+1. **Monitor + Merge:** PR #32 (`fix/ui-innerhtml-bug44`) — CI pending
+2. **Monitor + Merge:** PR #33 (`fix/registry-exports`) — CI pending
+3. **Merge when CI passes:** PR #16 (chokidar 3→5) — Dependabot rebase triggered; chokidar not used in build.js (native `fs.watch` confirmed)
+4. **Future:** ESLint 8→10 migration (PR #17 closed; requires flat config, plugin updates, breaking changes — planned for v4.2.0)
+5. **Future:** `build.js` constants extraction (CodeFactor hotspot: magic strings for SRC_DIR, DIST_DIR, OUT_FILE)
+6. **Future:** `comet-loop` architecture implementation (separate repo, 5-layer design)
+7. **Decision pending:** Project rename — see Decisions section
 
 ---
 
-## 🏗 Architecture Invariants (NEVER violate)
-- All modules register via `window._twtp.<name>` — no bare `window.*` state
-- All DOM data attributes via `DATA_ATTR.*` constants — no inline `data-twtp-*` strings
-- No `eval()`, `new Function()`, or `innerHTML` with unsanitized input
-- No hardcoded API keys, tokens, or credentials
-- Observer callbacks guarded against re-entrancy (`_processing` flag pattern)
-- Injection functions are idempotent (check `DATA_ATTR.INJECTED` before acting)
-- ESLint: `no-undef`, `no-var`, `eqeqeq` enforced; `.eslintignore` for `19-compat.js`, `21-footer.js`
-- CI uses Node 24 + `npm install` (no lockfile in repo)
+## 🏗 Architecture Invariants
+- **Security:** No `eval()`, `new Function()`, or `innerHTML` with unsanitized input. Use `createElement`/`textContent`/IDL property assignment.
+- **Registry:** Every module MUST export via `window._twtp.<ModuleName> = { ... }` at EOF. No bare `window.*` state.
+- **State:** Use `window._twtp.<Module>` for inter-module access. Use `DATA_ATTR.*` constants for all DOM data attributes — never inline `data-twtp-*` strings.
+- **Observer:** Re-entrancy guard via `_processing` flag. Disconnect observers when not needed. `_MAX_ERRORS = 3` blacklist via WeakMap.
+- **Environment:** Node 24 + `npm install` (no lockfile). ESLint must pass. CodeQL must pass.
+- **Versioning:** Tag-triggered releases only (`v[0-9]+.[0-9]+.[0-9]+`). Version must be in sync across `package.json`, `src/00-header.js`, `dist/` filename.
+- **DOM:** No hardcoded selectors. All IDs/classes use `${PFX}-*` pattern. No hardcoded API keys.
+
+---
+
+## 📝 Decisions
+- **Versioning:** Standardized on tag-triggered releases (`v4.1.0`).
+- **Code Quality:** Enforced `no-undef`, `no-var`, and `eqeqeq` via ESLint.
+- **Architecture:** `_processing` flag pattern for observer re-entrancy. WeakMap for per-element error count.
+- **Maintenance:** AGENT_MEMORY.md + AGENT_ROADMAP.md persist state across agent sessions.
+- **dist filename:** `TelegramWebTranslatorPro.user.js` (PascalCase) — fixed in PR #27.
+- **Dependabot labels:** Removed invalid labels (`dependencies`, `automated`, `github-actions`) in PR #29.
+- **chokidar:** Safe to accept bump (PR #16) — not used in build.js. Watch mode uses native `fs.watch`.
+- **ESLint 10:** Deferred. Requires flat config migration + peer-dep updates. Track for v4.2.0.
+- **Project rename 🔄 OPEN DECISION:** User is considering renaming the project. Candidates discussed:
+  - **BabelGram** (recommended — universally understood, zero trademark conflicts, maps to clean slug/dist)
+  - **Teleglossia** (unique, Greek *glossia* = tongue, zero collisions)
+  - **TeleLingua** (Latin, professional, multilingual-friendly)
+  - **TG Lens**, **ClearGram**, **Hermes for Telegram**, **TW·i18n** (alternatives)
+  - **Rename scope:** `package.json`, `src/00-header.js` (`@name`, `@namespace`), `build.js` (`OUT_FILE`), `release.yml`, GitHub repo slug, `window._twtp` registry key (needs deprecation shim)
+  - **Status:** No decision made yet. Waiting for user direction.
 
 ---
 
 ## 📋 Lessons Learned
-- CodeFactor hotspots: dead imports, mutation of cached objects, missing null guards — all addressed in PRs #23/#24
-- Dependabot PRs need label `dependencies` + `github-actions` — currently missing from `.github/dependabot.yml`
-- Branch protection requires CI + CodeQL to pass; merge button stays greyed until both complete
-- `release.yml` is tag-triggered: `git tag v4.1.0 && git push --tags` fires the release pipeline
-- CodeRabbit reviews are non-blocking (not Required); merge when required checks pass
+- `release.yml` must only trigger on `push: tags:` pattern — not on branch pushes.
+- `dist` filename must exactly match across `build.js` `OUT_FILE` and `release.yml` verification step.
+- Dependabot `labels:` entries must reference labels that actually exist in the repo.
+- All src modules must self-register via `window._twtp` — audit new modules on creation.
+- `innerHTML` with any external input is forbidden even if input appears controlled.
+- `npm ci` fails without a lockfile — use `npm install`.
+- Node 20 is deprecated; use Node 24 in all CI workflows.

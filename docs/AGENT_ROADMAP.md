@@ -1,220 +1,118 @@
-# AGENT_ROADMAP — Long-Term Vision & Active Planning
+# AGENT_ROADMAP — Comet Development Roadmap
 
-> **Purpose:** Strategic roadmap, idea drafts, and evaluation notes for the Comet autonomous agent.
-> This is a living document — append ideas, cross off completed items, evaluate hypotheses.
-
----
-
-## 🎯 Phase 1: Repository Hardening (IN PROGRESS)
-
-### telegram-web-translator-pro v4.1.0 Release
-
-| Task | Status | Notes |
-|------|--------|-------|
-| CI/CD pipelines (pr-check, codeql, release) | ✅ Done | Merged PR #18, #20 |
-| CONTRIBUTING.md + CHANGELOG.md | ✅ Done | Merged PR #19 |
-| PR template + issue templates | ✅ Done | Merged PR #20 |
-| release.yml (tag-triggered) | ⏳ PR #21 CI fixing | Blocked on lint pass |
-| AGENT_MEMORY.md + AGENT_ROADMAP.md | ⏳ PR #22 | This PR |
-| Dependabot PRs #14, #15 (safe actions bumps) | 🟡 Pending | Low risk |
-| Dependabot PR #16 (chokidar 3→5) | 🔴 Hold | Test build impact |
-| Dependabot PR #17 (eslint 8→10) | ⛔ SKIP | Breaking change |
-| CodeFactor hotspot: build.js | 🟡 Next | Extract constants |
-| CodeFactor hotspot: 09-observer.js | 🟡 Next | Add maxRetries guard |
-| ESLint 10 migration (flat config) | 🔵 Future | Dedicated PR, test thoroughly |
-| v4.1.0 git tag → release.yml trigger | 🔵 Future | After all PRs merged |
-| Branch protection ruleset finalized | 🟡 Pending | Settings → Rules |
+> **Purpose:** Tracks planned work, priorities, and long-term direction for the agent. Updated each session after reviewing AGENT_MEMORY.md. Read alongside AGENT_MEMORY.md at session start.
 
 ---
 
-## 🤖 COMET-LOOP — Autonomous Agent Persistence Framework
-
-### Status: DESIGN PHASE
-### Priority: HIGH (enables unlimited session length)
-
-### Problem Statement
-Comet (Nemotron Ultra 253B via Perplexity Pro) gets interrupted every ~200 tool steps.
-Sessions are lost. Context must be manually re-established.
-The goal: make Comet work autonomously, continuously, across unlimited sessions.
-
-### Solution Architecture
-
-#### Layer 1: State Persistence (GM Storage as Brain)
-```json
-// GM_setValue schema (comet-loop state store)
-{
-  "comet_session_id": "2026-06-20-001",
-  "comet_status": "idle | working | blocked | cooldown",
-  "comet_current_task": "Merge PR #21 on telegram-web-translator-pro",
-  "comet_task_queue": [...],
-  "comet_context_url": "https://perplexity.ai/search/...",
-  "comet_last_heartbeat": 1750000000,
-  "comet_resume_prompt": "Read docs/AGENT_MEMORY.md...",
-  "comet_cooldown_until": null,
-  "comet_rate_limit_hits": 0,
-  "github_pending_action": null,
-  "github_last_result": null
-}
-```
-
-#### Layer 2: ScriptCat Background Worker (Heartbeat + Revival)
-```javascript
-// Runs every 30 seconds in ScriptCat background context
-// Checks if Comet is idle and has pending tasks
-// If idle for >2 min AND task queue not empty: injects resume prompt
-// If rate limit cooldown active: waits
-// Implements exponential backoff: 30s → 60s → 120s → 300s
-```
-
-#### Layer 3: Cross-Tab Message Bus
-```javascript
-// Any tab can write a "command" to GM storage
-// The ScriptCat background worker reads commands and routes them
-// GitHub tab: writes action results without Comet needing to switch tabs
-// Perplexity tab: receives injected prompts from background worker
-```
-
-#### Layer 4: Perplexity Chat Injector
-```javascript
-// Monitors Perplexity chat UI for idle state
-// When Comet finishes response (no loading spinner): reads task queue
-// Injects next task as new message into chat input
-// Submits automatically with configurable delay (rate limit guard)
-```
-
-#### Layer 5: GitHub DOM Executor  
-```javascript
-// Reads GM_getValue('github_pending_action')
-// Actions: click_merge, navigate_to, read_ci_status, check_pr_state
-// Writes result to GM_setValue('github_last_result', ...)
-// Comet reads results via get_page_text on a dedicated status page
-```
-
-### Repository Plan
-
-**Option A: Separate repo `comet-loop`**
-- Pros: Clean separation, reusable for any project, own CI
-- Cons: Another repo to manage
-
-**Option B: Subfolder `tools/comet-loop/` in this repo**
-- Pros: Co-located, benefits from existing CI
-- Cons: Mixed concerns
-
-**Recommendation: Separate repo** — this is a serious tool that deserves its own identity.
-Estimated dev time (solo): 100-300 hours. With Comet: achievable in days.
-
-### File Structure (v0.1 target)
-```
-comet-loop/
-├── README.md                    # Vision + quick start
-├── comet-loop.user.js           # Main ScriptCat userscript
-├── src/
-│   ├── state-manager.js          # GM storage CRUD + schema validation
-│   ├── background-worker.js      # Heartbeat, revival, cooldown logic
-│   ├── perplexity-injector.js    # Chat UI monitor + prompt injection
-│   ├── github-executor.js        # DOM action executor for GitHub tabs
-│   ├── rate-limiter.js           # Exponential backoff, req/min tracking
-│   └── tab-router.js             # Cross-tab message routing
-├── schema/
-│   └── comet-state-schema.json   # JSON schema for GM storage
-├── docs/
-│   ├── ARCHITECTURE.md
-│   └── RATE_LIMITS.md            # Perplexity Pro limits research
-└── .github/
-    └── workflows/
-        └── lint.yml
-```
-
-### Rate Limit Research Needed
-- Perplexity Pro: requests per minute? per hour? per day?
-- Does tool calls count separately from messages?
-- What triggers the cooldown? Is it token-based or request-based?
-- Target: stay at 70% of limit to never hit the wall
-
-### Evolution Strategy
-1. Start with state-manager.js (pure GM storage wrapper)
-2. Add background-worker.js (polling loop)
-3. Add perplexity-injector.js (DOM injection)
-4. Test loop: Comet → ScriptCat → Comet
-5. Add github-executor.js (tab automation)
-6. Add rate-limiter.js (production hardening)
-7. Generalize: make it work for ANY project, not just TWTP
+## @ Last Updated
+2026-06-19 ∼03:00 EDT (Session 5 revision)
 
 ---
 
-## 🎯 Phase 2: TWTP v4.2.0 Feature Targets
+## 🟥 Priority 0 — Immediate (This Session / Next Session)
 
-| Feature | Priority | Notes |
-|---------|----------|-------|
-| Module 22-25 stabilization | HIGH | Already in src/, needs testing |
-| DeepL engine integration | MED | API key via GM_getValue |
-| Persistent language memory per chat | MED | Store in GM_setValue |
-| Auto-detect RTL/LTR per message | HIGH | Already in observer, needs perf tuning |
-| Toolbar UI redesign | LOW | Post-stability |
-| ScriptCat native API support | MED | @ScriptCat specific GMs |
-
----
-
-## 💡 Ideas Parking Lot
-
-### Userstyles for Token Reduction
-- Create GitHub userstyle to hide: sidebar nav, footer, social proof areas
-- Result: less DOM to read, fewer tokens per page analysis
-- Target: reduce GitHub page token cost by ~40%
-
-### Multi-Model Strategy
-- Use Perplexity Pro (Comet/Nemotron) for reasoning + planning
-- Use a lighter model for status checks / simple reads
-- Comet orchestrates, lighter model executes repetitive tasks
-
-### ScriptCat Agent Mode
-- ScriptCat latest version has an "agent" feature
-- Potential: give ScriptCat a system prompt to work alongside Comet
-- Risk: two agents coordinating needs careful protocol design
-
-### GitHub Actions as Async Worker
-- For long-running tasks, trigger a GitHub Action workflow_dispatch
-- Action runs the task (lint, build, test) and reports result via commit
-- Comet reads the result from Actions page or commit
-- Enables parallelism: Comet plans while Actions execute
-
-### Self-Editing Userscript
-- Comet edits the userscript source directly via GitHub editor
-- ScriptCat re-fetches from @updateURL automatically
-- Loop: Comet improves script → ScriptCat picks up update → tests live
-- Risk: need safeguard against breaking changes (version lock + rollback)
-
-### Perplexity Spaces as Persistent Context
-- Create a Perplexity Space dedicated to TWTP project
-- Upload key files as Space context
-- Each session: use the Space to load context automatically
-- Reduces need to re-read AGENT_MEMORY.md manually
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| P0-1 | Merge PR #32 (`fix/ui-innerhtml-bug44`) | ⏳ CI pending | Critical security fix — BUG-44 |
+| P0-2 | Merge PR #33 (`fix/registry-exports`) | ⏳ CI pending | 3 modules missing `window._twtp` |
+| P0-3 | Merge PR #34 (`docs/session5-memory-update`) | ⏳ CI pending | AGENT_MEMORY + ROADMAP sync |
+| P0-4 | Merge PR #16 (chokidar 3→5) | ⏳ Awaiting Dependabot rebase | `fs.watch` confirmed; safe |
+| P0-5 | **Project rename decision** | ⏳ Awaiting user | Candidates: BabelGram ★, Teleglossia, TeleLingua |
 
 ---
 
-## 📊 Metrics to Track
+## 🟠 Priority 1 — High (v4.1.x / Near-term)
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| Session length (tool steps) | ~200 | Unlimited (with comet-loop) |
-| GitHub tokens per page | ~2000 | ~1200 (with userstyle) |
-| CI pass rate on first try | ~40% | >90% |
-| CodeFactor grade | B | A |
-| Open PRs at session end | 6 | 0 |
-| Time to merge a clean PR | ~10 min | ~3 min |
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| P1-1 | `build.js` constants extraction | 🟡 Planned | CodeFactor hotspot: `SRC_DIR`, `DIST_DIR`, `OUT_FILE` as bare strings |
+| P1-2 | Audit remaining src modules for `window._twtp` exports | 🟡 Planned | `04-segmenter`, `05-pua`, `06-extractor`, `07-translator`, `08-injector`, `10-cache`, `12-settings`, `14–n` |
+| P1-3 | Branch protection ruleset activation | 🟡 Planned | Tab `Settings → Rules → new` is pre-loaded |
+| P1-4 | Audit `12-settings.js` for `GM_setValue`/`GM_getValue` usage | 🟡 Planned | Must use ScriptCat-compatible API fallbacks |
 
 ---
 
-## 🗓 Decision Log
+## 🟡 Priority 2 — Medium (v4.2.0)
 
-| Date | Decision | Rationale |
-|------|----------|-----------|
-| 2026-06-19 | Use `npm install` not `npm ci` | No package-lock.json in repo |
-| 2026-06-19 | Node 24 for all CI | Node 20 deprecated in GH Actions |
-| 2026-06-20 | Skip ESLint 8→10 PR | Breaking change, requires flat config migration |
-| 2026-06-20 | Separate repo for comet-loop | Clean separation, reusability |
-| 2026-06-20 | docs/*.md → agent memory | Persistent context across session interruptions |
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| P2-1 | ESLint 8→10 migration | 🔵 Deferred | Flat config required; peer-dep updates; plan as separate feature branch |
+| P2-2 | DeepL engine integration | 🔵 Planned | Add alongside Google Translate; user-selectable in UI panel |
+| P2-3 | Persistent language memory | 🔵 Planned | Remember per-chat tgtLang via `GM_setValue`; key = chat ID |
+| P2-4 | Auto-detect RTL/LTR per message | 🔵 Planned | Use `03-bidi.js` `detectDir()` — already implemented, needs integration |
+| P2-5 | ScriptCat native API support | 🔵 Planned | `GM.xmlHttpRequest` vs `GM_xmlhttpRequest` shim |
+| P2-6 | Module 22-25 stabilization | 🔵 Planned | High-priority per original roadmap |
 
 ---
 
-*Last updated: 2026-06-20 02:00 EDT by Comet agent (Session 3)*
+## 🟢 Priority 3 — Low / Future
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| P3-1 | Toolbar UI redesign | 🔵 Low | Cleaner settings panel; keyboard shortcut support |
+| P3-2 | Greasy Fork / OpenUserJS publication | 🔵 Future | After rename decision is made |
+| P3-3 | Automated E2E test harness | 🔵 Future | Playwright + Telegram Web sandbox |
+
+---
+
+## 🤖 Comet-Loop Architecture
+
+**Status:** Design Phase. **Priority:** P1 after rename decision.
+
+**Purpose:** An autonomous agent persistence framework designed to enable unlimited session operation by overcoming the ~200 tool-step interruption limit.
+
+### 5-Layer Design
+| Layer | Name | Description |
+|-------|------|-------------|
+| 1 | **State** | GM Storage schema: session ID, status, task queue, heartbeat |
+| 2 | **Background** | ScriptCat worker: heartbeat, revival, exponential backoff |
+| 3 | **Router** | Cross-tab message bus (GitHub ↔ Perplexity) |
+| 4 | **Injector** | Monitors Perplexity UI to inject tasks + resume prompts |
+| 5 | **Executor** | GitHub DOM executor: merges PRs, reads CI status, edits files |
+
+### Implementation Plan
+- **Repository:** Separate repo for clean separation and reusability
+- **Core files:** `state-manager.js`, `background-worker.js`, `perplexity-injector.js`, `github-executor.js`, `rate-limiter.js`, `tab-router.js`
+- **Evolution:** State mgmt → background polling → UI injection → GitHub automation
+
+### Success Metrics
+- Session length: ~200 steps → unlimited
+- GitHub token efficiency: -40% (via userstyles removing decorative elements)
+- Merge cycle time: ~10 min → ~3 min
+
+---
+
+## 📊 Project Rename Decision Matrix
+
+| Name | Pros | Cons | Slug | Score |
+|------|------|------|------|-------|
+| **BabelGram** | Universal understanding; zero trademark conflicts; clean slug | None found | `babelgram` | ★★★★★ |
+| **Teleglossia** | Unique; zero npm/GitHub collisions; scholarly | Harder to pronounce in some languages | `teleglossia` | ★★★★ |
+| **TeleLingua** | Latin; professional; multilingual-friendly | Less unique | `tele-lingua` | ★★★★ |
+| **TG Lens** | Very short | Too generic; could apply to many TG tools | `tg-lens` | ★★★ |
+| **ClearGram** | Intuitive | Sounds like a cleaning product | `cleargram` | ★★★ |
+| **Hermes for Telegram** | Strong mythology metaphor | Long; not slug-friendly | `hermes-tg` | ★★★ |
+| **TW·i18n** | Technically precise | Too developer-jargon for end users | `tw-i18n` | ★★★ |
+
+**Current recommendation: BabelGram**
+
+### Rename Scope (atomic PR when decided)
+1. `package.json` — `name`, `description`
+2. `src/00-header.js` — `@name`, `@namespace`, `@description`
+3. `build.js` — `OUT_FILE` constant
+4. `.github/workflows/release.yml` — dist path references
+5. GitHub repo Settings → rename slug
+6. `window._twtp` registry key — add deprecation shim for `_babelgram` alias
+7. `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md` — name references
+
+---
+
+## 📌 Session History Summary
+
+| Session | Date | Key Accomplishments |
+|---------|------|---------------------|
+| 1 | 2026-06-20 | Repo hardening, branch protection, Dependabot, CodeFactor |
+| 2 | 2026-06-20 | CI/CD pipeline, ESLint, CodeRabbit, PR #18 |
+| 3 | 2026-06-20 | Docs, CI templates, release.yml, AGENT_MEMORY.md |
+| 4 | 2026-06-20 | CodeFactor hotspot fixes (PRs #23, #24), Dependabot PRs #14/#15 |
+| 5 | 2026-06-19 | BUG-44 (innerHTML), registry exports, PR #28/#29 merged, ROADMAP revised, rename decision documented |
