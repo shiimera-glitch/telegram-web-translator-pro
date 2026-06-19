@@ -22,32 +22,22 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '22'
 
       - name: Install dependencies
-        run: npm ci --ignore-scripts
+        run: npm install --ignore-scripts
 
       - name: Build userscript
         run: node build.js
 
       - name: Get version
         id: ver
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+        run: echo "VERSION=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
 
-      - name: Commit dist if changed
+      - name: Commit dist artifact
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add dist/
-          git diff --staged --quiet || git commit -m "build: v${{ steps.ver.outputs.version }} [skip ci]"
+          git diff --cached --quiet || git commit -m "chore(dist): build v${{ steps.ver.outputs.VERSION }}"
           git push
-
-      - name: Create Release
-        if: startsWith(github.event.head_commit.message, 'release:')
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.ver.outputs.version }}
-          name: v${{ steps.ver.outputs.version }}
-          files: dist/TelegramWebTranslatorPro.user.js
-          generate_release_notes: true
