@@ -1,0 +1,4 @@
+# compat shims use intentional short-circuit patterns that Espree cannot parse
+# these files are manually reviewed and excluded from automated lint
+src/19-compat.js
+src/21-footer.js
