@@ -42,3 +42,6 @@
 //                    AbortController per request. Cache hit/miss tracking.
 // 3.0.2  (baseline)  Per-chat overrides, dual targets, polyglot skip,
 //                    hover bubble, LRU cache, circuit breaker
+
+/* ---- open top-level IIFE (closed in 21-footer.js) ---- */
+(function(){ 'use strict';
