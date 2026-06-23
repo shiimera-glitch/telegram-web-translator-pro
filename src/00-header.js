@@ -1,8 +1,7 @@
 // ==UserScript==
 // @name         Telegram Web Translator Pro
 // @namespace    https://greasyfork.org/
-// @version      4.1.0
-// @description  RTL/LTR bidi engine, context injection, mixed-script
+// @version      4.2.0// @description  RTL/LTR bidi engine, context injection, mixed-script
 //               segmentation, spoiler support, PUA-guard rich format
 //               preservation, dual targets, LRU cache, circuit breaker
 // @author       shiimera-glitch
@@ -22,6 +21,8 @@
 // @connect      api.openai.com
 // @connect      api.anthropic.com
 // @connect      api.cognitive.microsofttranslator.com
+// @connect      api.dictionaryapi.dev
+// @connect      api.datamuse.com
 // @connect      *
 // @run-at       document-end
 // @homepageURL  https://github.com/shiimera-glitch/telegram-web-translator-pro
