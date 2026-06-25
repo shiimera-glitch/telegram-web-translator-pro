@@ -44,4 +44,5 @@
 //                    hover bubble, LRU cache, circuit breaker
 
 /* ---- open top-level IIFE (closed in 21-footer.js) ---- */
-(function(){ 'use strict';
+(function() {
+'use strict';
