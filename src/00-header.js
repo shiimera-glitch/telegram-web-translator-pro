@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name         Telegram Web Translator Pro
 // @namespace    https://greasyfork.org/
-// @version      4.2.0// @description  RTL/LTR bidi engine, context injection, mixed-script
+// @version      4.2.0
+// @description  RTL/LTR bidi engine, context injection, mixed-script
 //               segmentation, spoiler support, PUA-guard rich format
 //               preservation, dual targets, LRU cache, circuit breaker
 // @author       shiimera-glitch
