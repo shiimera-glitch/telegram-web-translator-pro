@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name         Telegram Web Translator Pro
 // @namespace    https://greasyfork.org/
-// @version      4.2.0// @description  RTL/LTR bidi engine, context injection, mixed-script
+// @version      4.2.0
+// @description  RTL/LTR bidi engine, context injection, mixed-script
 //               segmentation, spoiler support, PUA-guard rich format
 //               preservation, dual targets, LRU cache, circuit breaker
 // @author       shiimera-glitch
@@ -42,3 +43,7 @@
 //                    AbortController per request. Cache hit/miss tracking.
 // 3.0.2  (baseline)  Per-chat overrides, dual targets, polyglot skip,
 //                    hover bubble, LRU cache, circuit breaker
+
+/* ---- open top-level IIFE (closed in 21-footer.js) ---- */
+(function() {
+'use strict';
