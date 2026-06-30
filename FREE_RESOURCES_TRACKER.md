@@ -35,9 +35,8 @@
 
 #### Paid Models - Best Value
 - **Z.ai: GLM 5.2**
-  - Cost: $0.95/M input, $3/M output
-  - Context: 1.05M tokens
-  - Use: Long-context coding, debugging
+  - Cost: $1.40/M input, $4.40/M output
+  - Context: 1M tokens  - Use: Long-context coding, debugging
   - Note: Released June 2026, open-weight
 
 #### Usage Limits
@@ -168,8 +167,8 @@ ollama pull deepseek-r1:7b
 **Status:** ✅ ACTIVE (used in PR #39)
 
 - **Cost:** $0
-- **Limit:** Unlimited (rate-limited)
-- **Use:** Dictionary lookups in telegram-web-translator
+  - **Limit:** Rate-limited (community-maintained, no SLA; high traffic may impact reliability)
+  -   - **Use:** Dictionary lookups in telegram-web-translator
 
 ### DataMuse API (datamuse.com)
 
@@ -178,6 +177,7 @@ ollama pull deepseek-r1:7b
 - **Cost:** $0  
 - **Limit:** 100,000 req/day
 - **Use:** Thesaurus, word associations
+-   - **Note:** API keys will be required starting January 1, 2027
 
 ---
 
@@ -209,12 +209,12 @@ ollama pull deepseek-r1:7b
 
 ## 📅 MONTHLY RESET TRACKER
 
-| Service | Limit | Used | Remaining | Reset Date |
-|---------|-------|------|-----------|------------|
-| GitHub Actions | 2,000 min | 45 min | 1,955 min | July 1, 2026 |
-| GitHub Codespaces | 120 hrs | 8 hrs | 112 hrs | July 1, 2026 |
-| OpenRouter Free | 50 req/day | 0 | 50 | Daily |
-| DataMuse API | 100K/day | <100 | ~100K | Daily |
+| Service | Limit | Used | Remaining | Reset Date | Verified On |
+|---------|-------|------|-----------|------------| :--- |
+| GitHub Actions | 2,000 min | 45 min | 1,955 min | July 1, 2026 | Jun 23, 2026 |
+| GitHub Codespaces | 120 hrs | 8 hrs | 112 hrs | July 1, 2026 | Jun 23, 2026 |
+| OpenRouter Free | 50 req/day | 0 | 50 | Daily | Jun 23, 2026 |
+| DataMuse API | 100K/day | <100 | ~100K | Daily | Jun 23, 2026 |
 
 ---
 
